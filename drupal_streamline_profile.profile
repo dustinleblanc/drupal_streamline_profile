@@ -4,7 +4,7 @@
  *
  * Allows the profile to alter the site configuration form.
  */
-function drupal_bootstrap_profile_form_install_configure_form_alter(&$form, $form_state) {
+function drupal_streamline_profile_form_install_configure_form_alter(&$form, $form_state) {
   // Pre-populate the site config form with some sane defaults for quicker install
   $default_mail = 'EMAIL_ADDY';
 
