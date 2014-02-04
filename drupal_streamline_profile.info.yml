@@ -1,0 +1,22 @@
+name : CLIENT_NAME Profile
+type : profile
+description : A Drupal install profile for CLIENT_NAME
+version : 0.1
+core : 8.x
+
+dependencies :
+  - field
+  - taxonomy
+  - menu
+  - block
+  - contextual
+  - dblog
+  - toolbar
+  - path
+  - file
+  - image
+
+# Required contrib modules
+
+
+# Custom modules

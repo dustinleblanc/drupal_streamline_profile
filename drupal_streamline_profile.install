@@ -12,37 +12,33 @@
  * @see system_install()
  */
 function drupal_streamline_profile_install() {
-  // Enable default permissions for system roles.
-  user_role_grant_permissions(DRUPAL_ANONYMOUS_RID, array('access content'));
-  user_role_grant_permissions(DRUPAL_AUTHENTICATED_RID, array('access content'));
+   // Enable default permissions for system roles.
+  user_role_grant_permissions(DRUPAL_ANONYMOUS_RID, array('access content', 'access comments'));
+  user_role_grant_permissions(DRUPAL_AUTHENTICATED_RID, array('access content', 'access comments', 'post comments', 'skip comment approval'));
 
-  // Create a default role for site administrators, with all available permissions assigned.
-  $admin_role = new stdClass();
-  $admin_role->name = 'administrator';
-  $admin_role->weight = 2;
-  user_role_save($admin_role);
-  user_role_grant_permissions($admin_role->rid, array_keys(module_invoke_all('permission')));
-
+  // Enable all permissions for the administrator role.
+  user_role_grant_permissions('administrator', array_keys(\Drupal::moduleHandler()->invokeAll('permission')));
   // Set this as the administrator role.
-  variable_set('user_admin_role', $admin_role->rid);
+  $user_settings->set('admin_role', 'administrator')->save();
 
   // Assign user 1 the "administrator" role.
   db_insert('users_roles')
-    ->fields(array('uid' => 1, 'rid' => $admin_role->rid))
+    ->fields(array('uid' => 1, 'rid' => 'administrator'))
     ->execute();
 
-  // Enable custom theme
-  system_rebuild_theme_data();
-  theme_enable(array('drupal_streamline_theme'));
-  variable_set('theme_default', 'drupal_streamline_theme');
+  // Enable drupal_streamline_theme theme and set it as default theme instead of Stark.
+  // @see system_install()
+  $default_theme = 'drupal_streamline_theme';
+  \Drupal::config('system.theme')
+    ->set('default', $default_theme)
+    ->save();
+  theme_enable(array($default_theme));
+  theme_disable(array('stark'));
 
-  // Enable caching
-  variable_set('cache', 1);
-  variable_set('page_cache_maximum_age', 1800); // Allows reverse proxies (like Varnish) to store content for up to half an hour
-
-  // Enable css and javascript aggregation by default
-  variable_set('preprocess_css', 1);
-  variable_set('preprocess_js', 1);
+  // Enable the admin theme.
+  theme_enable(array('seven'));
+  \Drupal::config('system.theme')->set('admin', 'seven')->save();
+  \Drupal::config('node.settings')->set('use_admin_theme', '1')->save();
 
   // Add Migrations here as necessary
 }
